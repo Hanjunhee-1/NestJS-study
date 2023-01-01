@@ -1,0 +1,15 @@
+NestJS 에서의 모듈은 @Module() 이라는 데코레이터로 표현한다.
+
+AppModule 은 NestJS 의 시작점이라고 한다.
+
+★ 모듈을 사용하는 이유?
+    밀접하게 관련된 기능을 모아서 관리하는 효율적인 방법이기 때문이다.
+    예시) 사용자 모듈, 주문 모듈, 채팅 모듈 등
+
+같은 기능에 해당하는 것들은 하나의 모듈 안에 통합하여 사용한다.
+예시) OrderController, OrderService, OrderEntity 이렇게 3가지는 Order 에 대한 기능이기 때문에
+      OrderModule 에 모아서 작성하고 관리한다.
+
+
+※ 공통된 모듈을 여러 모듈에서 사용할 수 있다.
+※ 모든 모듈은 AppModule 에서 import 되어 사용된다.

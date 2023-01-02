@@ -1,0 +1,45 @@
+모델을 정의하기 위해서는 interface 또는 class 를 사용하면 된다.
+
+
+★  interface 와 class 의 차이
+    (1) interface: 
+        property 의 타입만을 체크한다.
+    (2) class:
+        property 의 타입도 체크하고 instance 를 생성할 수 있다.
+
+
+아래와 같이 model 을 정의했다.
+```
+    // board.model.ts
+    export interface Board {
+      id: string;
+      title: string;
+      description: string;
+      status: BoardStatus;
+    }
+
+    export enum BoardStatus {
+    PUBLIC = 'PUBLIC',
+    PRIVATE = 'PRIVATE',
+    }
+```
+
+Board 의 모델을 정의했으니 기존에 작성된 Controller 와 Service 의 코드도
+약간의 수정을 해주는 것이 좋다.
+```
+    // boards.service.ts
+    private boards: Board[] = [];
+
+    getAllBoard(): Board[] {
+        return this.boards;
+    }
+```
+```
+    // boards.controller.ts
+    @Get()
+    getAllBoard(): Board[] {
+        return this.boardsService.getAllBoard();
+    }
+```
+
+※  함수와 변수의 Type 명시는 굳이 안해도 되지만 가독성을 위해서 해주는 것이 좋다!     

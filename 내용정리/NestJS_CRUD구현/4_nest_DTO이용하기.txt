@@ -1,0 +1,69 @@
+DTO 는 Data Transfer Object 의 약자로 service 와 controller 간의
+데이터 교환을 위한 객체이다.
+
+★  왜 DTO 를 사용해야 할까?
+    Controller 에서 @Body(), @Query(), @Param() 으로 사용자가 보낸 요청을 다루게 된다.
+    사용자가 몇 개 되지 않는 요청을 보낸다면 DTO 를 쓰지 않아도 크게 불편하지 않지만
+    요청이 많다면 많이 불편해진다. 특히 나중에 유지보수를 할 때 굉장히 불편하며 코드를 관리하는 것도
+    힘들어진다. 때문에 DTO 를 사용해야 한다.
+
+
+DTO 는 크게 2가지로 나뉜다고 보면 된다. 
+    
+    (1) Controller 에서 Service 로 가는 DTO
+    (2) Service 에서 Controller 로 가는 DTO
+
+(1) 의 경우는 사용자의 요청을 받아주기 위한 DTO 이고
+(2) 의 경우는 사용자의 요청에 따른 응답을 더욱 아름답게 가공하여
+프론트엔드 측으로 보내주기 위함이다. 
+
+
+DTO 는 따로 생성하는 명령어가 없고 오로지 수동이다... :)
+보통 다음과 같은 순서대로 DTO 를 만들고 관리한다.
+
+    (1) DTO 가 필요한 모듈의 디렉토리 밑에 'dto' 혹은 'dtos' 라는 이름으로 폴더를 생성한다.
+    (2) kebab-case 로 DTO 이름을 지정하고 DTO class 를 작성한다.
+
+        ※  kebab-case 는 이름에서부터 알 수 있듯이 대문자를 사용하지 않으며
+            단어 사이의 띄어쓰기 혹은 단어가 바뀌는 곳을 '-' 으로 대체한다.
+            예시) create-board.dto.ts
+
+
+다음과 같이 create-board.dto.ts 를 작성해보았다.
+```
+    // create-board.dto.ts
+    export class CreateBoardDto {
+        title: string;
+        description: string;
+    }
+```
+
+이제 DTO 를 만들었으니 기존에 있던 contorller 와 service 에서도 수정이 필요하다.
+```
+    // boards.controller.ts
+    @Post()
+    createBoard(@Body() createBoardDto: CreateBoardDto): Board {
+        return this.boardsService.createBoard(createBoardDto);
+    }
+```
+```
+    // boards.service.ts
+    createBoard(createBoardDto: CreateBoardDto): Board {
+
+        // {} 으로 감싸고 변수명을 지정하면 해당 객체 중 변수명에 대한 값을 받아올 수 있다.
+        const { title, description } = createBoardDto;
+        const board: Board = {
+        id: uuid(),
+        title,
+        description,
+        status: BoardStatus.PUBLIC,
+        };
+
+        this.boards.push(board);
+        return board;
+    }
+```
+
+
+DTO 를 이용하면 사용자가 보내는 요청이 늘어난다고 해도 DTO 파일만을 수정하며 되니까
+훨씬 효율적이다. 

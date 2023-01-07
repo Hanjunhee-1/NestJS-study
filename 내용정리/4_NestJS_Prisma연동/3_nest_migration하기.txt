@@ -1,0 +1,30 @@
+schema 에 모든 정보를 작성했다면 다음과 같은 과정을 거쳐야 한다.
+
+    (1) migration 하기
+
+        migration 을 위해서는 다음과 같은 명령어를 입력해주어야 한다.
+        ```
+            npx prisma migrate dev --name model_create
+        ```
+
+        'npx prisma migrate dev' 까지는 필수로 입력해야 migration 이 진행되어
+        자신이 작성한 model 에 대한 모든 정보가 DB 에 테이블로 생성된다.
+
+        --name 같은 경우에는 해당 작업에 대한 설명을 추가해주는 것이라고 생각하면 된다.
+
+
+        ※  이렇게 migration 을 해주었다면 /prisma 디렉토리에 migrations 라는 디렉토리가 새로 생긴다.
+            해당 디렉토리에는 여태껏 작업했던 내역들이 남겨져있으며 혹시라도 model 정보를 실수로 지웠다면
+            ```
+                npx prisma db pull 
+            ```    
+            명령어를 통해 DB 에 migration 했던 정보를 가져올 수 있다.
+
+    (2) generate
+
+        generate 는 초기에 schema 를 작성하고 migration 했을 때만 진행하면 된다.
+        ```
+            npx prisma generate
+        ```
+
+        위의 과정을 거쳤다면 Prisma 패키지를 통해 CRUD 작업을 할 준비가 끝난 것이다.

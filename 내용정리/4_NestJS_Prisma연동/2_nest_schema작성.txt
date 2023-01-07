@@ -1,0 +1,56 @@
+prisma 를 설치하고 생성된 prisma/schema.prisma 파일을 작성해볼 것이다.
+
+★  generator 
+
+    generator 는 client 가 어떠한 data model 을 기반으로 생성되어야 하는지에 대한 정보를 가진다.
+    ```
+        generator client {
+            provider = "prisma-client-js"
+            binaryTargets = ["windows", "darwin"]
+        }
+    ```
+    'binaryTargets' 는 binary 파일을 다룰 때 macOS 와 windows 간의 차이가 생기는 것을 다루기 위해 추가해준것이다.
+
+
+★  datasource
+
+    datasource 는 DB 와 연동되는 정보를 가진다.
+    ```
+        datasource db {
+            provider = "mysql"
+            url      = env("DATABASE_URL")
+        }
+    ```
+    'provider' 는 자신이 사용할 DB 를 써준다.
+
+ 
+★  model
+
+    model 은 DB 에 저장될 table 이다.
+    ```
+        model Board {
+            id              Int         @id @default(autoincrement())
+            title           String      @db.VarChar(255)
+            description     String      @db.VarChar(255)
+            status          BoardStatus @default(PUBLIC)
+        }
+
+        enum BoardStatus {
+            PUBLIC
+            PRIVATE
+        }
+    ```
+    기존에 사용하던 src/boards/board.model.ts 파일의 내용을 통해 model 을 생성해준다.
+
+    ※  model 생성 문법 설명
+        
+        (1) id 의 경우 Primary Key 가 될 것이고 추가될 때마다 알아서 카운트되도록
+            @id @default(autoincrement()) 를 추가해주었다.
+
+        (2) title 과 description 의 경우 문자열을 저장할 것인데 prisma 자체에서 제공하는 
+            varchar 의 크기는 191 이기 때문에 
+            @db.VarChar(255) 이런 식으로 Native Type Mapping 을 해주어야 한다.
+
+        (3) status 의 경우 enum 형 데이터이기 때문에 BoardStatus 라는 enum 을 생성하여
+            BoardStatus 타입을 가질 수 있도록 했다. 그리고 기본으로 가지는 값은 PUBLIC 이었기 때문에
+            @default(PUBLIC) 으로 해주었다.

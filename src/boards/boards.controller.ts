@@ -1,5 +1,13 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { BoardsService } from './boards.service';
+import { CreateBoardDto } from './dtos/create-board.dto';
 
 @Controller('boards')
 export class BoardsController {
@@ -15,6 +23,12 @@ export class BoardsController {
   @Get(':id')
   async getBoardById(@Param('id', ParseIntPipe) id: number) {
     const board = await this.boardsService.getBoardById(id);
+    return board;
+  }
+
+  @Post()
+  async createBoard(@Body() createBoardDto: CreateBoardDto) {
+    const board = await this.boardsService.createBoard(createBoardDto);
     return board;
   }
   // 아래 부분은 더 이상 사용하지 않음

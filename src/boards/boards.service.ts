@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+// import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateBoardDto } from './dtos/create-board.dto';
 
 @Injectable()
 export class BoardsService {
@@ -32,6 +34,28 @@ export class BoardsService {
     }
 
     return board;
+  }
+
+  async createBoard(createBoardDto: CreateBoardDto) {
+    const { title, description } = createBoardDto;
+
+    const board = await this.prisma.board.create({
+      data: {
+        title,
+        description,
+      },
+    });
+    return board;
+
+    // 이런 방식도 있는데 return 값이 원하는대로(API 문서대로) 나오지 않을 듯...
+    // const board: Prisma.BoardUncheckedCreateInput = {
+    //   title,
+    //   description,
+    // };
+
+    // // await this.prisma.board.create({ data: board });
+    // console.log(board);
+    // return board;
   }
 
   // 아래 부분은 더 이상 사용하지 않음.

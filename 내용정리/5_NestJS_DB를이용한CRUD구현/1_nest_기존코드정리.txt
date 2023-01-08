@@ -3,3 +3,5 @@
 일단 board.model.ts 파일은 필요가 없다. 왜나하면 schema.prisma 파일에서 전부 정의해주었기 때문이다.
 
 그리고 service 와 controller 의 내용들도 이제 필요가 없다. 지우기 아까우니 그냥 주석처리 해놓았다...
+
+status 에 대한 유효성 검증을 해주는 board-status-validation.pipe.ts 파일은 전부 주석처리 해주었다.

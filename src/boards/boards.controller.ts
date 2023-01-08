@@ -24,6 +24,12 @@ export class BoardsController {
   }
   // TEST 용
 
+  @Get()
+  async getBoards() {
+    const boards = await this.boardsService.getBoards();
+    return boards;
+  }
+
   @Get(':id')
   async getBoardById(@Param('id', ParseIntPipe) id: number) {
     const board = await this.boardsService.getBoardById(id);

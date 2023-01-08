@@ -21,6 +21,11 @@ export class BoardsService {
   }
   // TEST 용
 
+  async getBoards() {
+    const boards = await this.prisma.board.findMany();
+    return boards;
+  }
+
   async getBoardById(id: number) {
     const board = await this.prisma.board.findUnique({
       where: {

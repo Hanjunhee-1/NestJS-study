@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -30,6 +31,12 @@ export class BoardsController {
   async createBoard(@Body() createBoardDto: CreateBoardDto) {
     const board = await this.boardsService.createBoard(createBoardDto);
     return board;
+  }
+
+  @Delete(':id')
+  async deleteBoard(@Param('id', ParseIntPipe) id: number) {
+    const result = await this.boardsService.deleteBoard(id);
+    return result;
   }
   // 아래 부분은 더 이상 사용하지 않음
   // @Get()

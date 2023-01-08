@@ -21,7 +21,7 @@ export class BoardsService {
   // TEST 용
 
   async getBoardById(id: number) {
-    const board = this.prisma.board.findUnique({
+    const board = await this.prisma.board.findUnique({
       where: {
         id,
       },
@@ -55,6 +55,18 @@ export class BoardsService {
 
     // // await this.prisma.board.create({ data: board });
     // return board;
+  }
+
+  async deleteBoard(id: number) {
+    const board = await this.getBoardById(id);
+
+    await this.prisma.board.delete({
+      where: {
+        id: board.id,
+      },
+    });
+
+    return 'success';
   }
 
   // 아래 부분은 더 이상 사용하지 않음.

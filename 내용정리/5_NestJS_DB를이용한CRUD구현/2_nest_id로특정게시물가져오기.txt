@@ -1,0 +1,53 @@
+getBoardById() 부분을 다시 구현해볼 것이다.
+
+로컬에 있는 데이터를 활용할 때는 javascript 문법을 아는 것이 중요했지만
+DB 연동을 통해 DB 에 있는 데이터를 활용할 때는 자신이 사용하는 ORM 의 CRUD 문법을
+아는 것이 굉장히 중요하다.
+
+
+★  id 를 통해 특정 게시물을 가져오는 방법
+
+    우선 Prisma 에서 제공하는 함수 중에 findUnique() 를 사용하면 간단히 해결된다.
+    그래서 아래와 같이 service 로직을 작성했다.
+    ```
+        // boards.service.ts
+        async getBoardById(id: number) {
+            const board = this.prisma.board.findUnique({
+                where: {
+                    id,
+                },
+            });
+
+            if (!board) {
+                throw new NotFoundException(
+                    '해당 id 를 가지는 게시물을 찾을 수 없습니다 X(',
+                );
+            }
+
+            return board;
+        }
+    ```
+    기존에 로컬 데이터를 활용할 때와 코드가 크게 달라지지 않는다. 
+    prisma 라는 이름으로 생성했던 PrismaService 를 주입받았다.
+    prisma 에 (.) 연산자로 접근하면 뭐가 많이 뜨는데 그 중에서 자신이 생성한 model 을 찾을 수 있으면 된다.
+    그 모델에도 (.) 연산자로 접근하면 Prisma 에서 제공하는 CRUD 함수들이 존재한다.
+    원하는 함수를 고르고 json 객체를 보내주기만 하면 된다.
+
+    ※  where: { id, } 이런 부분이 있는데 원래는 { id: id, } 이렇게 되야하지만 
+        key 값과 value 가 같으면 value 를 생략할 수 있다!
+
+    
+    이제 controller 도 맞춰서 작성해주면 된다.
+    ```
+        // boards.controller.ts
+        @Get(':id')
+        async getBoardById(@Param('id', ParseIntPipe) id: number) {
+            const board = await this.boardsService.getBoardById(id);
+            return board;
+        }
+    ```
+    controller 의 코드는 바뀔 일이 거의 없을 것이다. 
+
+    ※  사용자에게 Param 으로 숫자값을 받아야 할 때 사용자가 숫자를 입력해도 그 숫자는 문자형 숫자가 된다.
+        때문에 ParseIntPipe 를 적용시켜주던가 아니면 getBoardById() 에 매개변수로 보낼 때 +id 이런 식으로 보내주어야 한다.
+        커스텀 Pipe 를 따로 생성하여 예외처리도 깔끔하게 하는 것을 추천한다. 

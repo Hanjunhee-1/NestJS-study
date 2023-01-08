@@ -1,0 +1,34 @@
+이번에는 deleteBoard() 를 작성해볼 것이다.
+
+아래와 같이 작성해주었다.
+```
+    // boards.service.ts
+    async deleteBoard(id: number) {
+        const board = await this.getBoardById(id);
+
+        await this.prisma.board.delete({
+            where: {
+                id: board.id,
+            },
+        });
+
+        return 'success';
+    }
+```
+이미 존재하는 getBoardById() 를 통해 해당 게시물이 있는지 없는지 확인하고 
+있다면 board 에 찾으려는 게시물의 내용들이 담겨있을 것이다.
+그러면 해당 게시물의 id 를 찾아 지워주고 'success' 메시지를 보내준다.
+
+```
+    // boards.controller.ts
+    @Delete(':id')
+    async deleteBoard(@Param('id', ParseIntPipe) id: number) {
+        const result = await this.boardsService.deleteBoard(id);
+        return result;
+    }
+```
+controller 는 간단하다.
+
+
+※  반드시 async/await 을 잘 작성해주자...
+    어이없는 실수를 하는 바람에 몇 시간을 잡아먹은것인지...

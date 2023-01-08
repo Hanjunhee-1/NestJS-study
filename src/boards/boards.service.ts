@@ -2,11 +2,24 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Board, BoardStatus } from './board.model';
 import { v1 as uuid } from 'uuid';
 import { CreateBoardDto } from './dtos/create-board.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class BoardsService {
   // DB 연동 대신 local 에 저장
   private boards: Board[] = [];
+
+  // TEST 용
+  constructor(private readonly prisma: PrismaService) {}
+
+  async test() {
+    return await this.prisma.board.findUnique({
+      where: {
+        id: 1,
+      },
+    });
+  }
+  // TEST 용
 
   getAllBoard(): Board[] {
     return this.boards;

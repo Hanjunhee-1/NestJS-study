@@ -18,6 +18,13 @@ import { BaordStatusValidationPipe } from './pipes/board-status-validation.pipe'
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
+  // TEST 용
+  @Get('/test')
+  test() {
+    return this.boardsService.test();
+  }
+  // TEST 용
+
   @Get()
   getAllBoard(): Board[] {
     return this.boardsService.getAllBoard();

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { BoardStatus } from '@prisma/client';
 // import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
@@ -63,6 +64,21 @@ export class BoardsService {
     await this.prisma.board.delete({
       where: {
         id: board.id,
+      },
+    });
+
+    return 'success';
+  }
+
+  async updateBoardStatus(id: number, status: BoardStatus) {
+    const board = await this.getBoardById(id);
+
+    await this.prisma.board.update({
+      where: {
+        id: board.id,
+      },
+      data: {
+        status,
       },
     });
 

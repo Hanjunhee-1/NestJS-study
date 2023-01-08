@@ -5,10 +5,13 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
+import { BoardStatus } from '@prisma/client';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
+import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
 
 @Controller('boards')
 export class BoardsController {
@@ -36,6 +39,15 @@ export class BoardsController {
   @Delete(':id')
   async deleteBoard(@Param('id', ParseIntPipe) id: number) {
     const result = await this.boardsService.deleteBoard(id);
+    return result;
+  }
+
+  @Patch(':id')
+  async updateBoardStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status', BoardStatusValidationPipe) status: BoardStatus,
+  ) {
+    const result = await this.boardsService.updateBoardStatus(id, status);
     return result;
   }
   // 아래 부분은 더 이상 사용하지 않음

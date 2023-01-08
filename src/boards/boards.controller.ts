@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 
 @Controller('boards')
@@ -12,6 +12,11 @@ export class BoardsController {
   }
   // TEST 용
 
+  @Get(':id')
+  async getBoardById(@Param('id', ParseIntPipe) id: number) {
+    const board = await this.boardsService.getBoardById(id);
+    return board;
+  }
   // 아래 부분은 더 이상 사용하지 않음
   // @Get()
   // getAllBoard(): Board[] {

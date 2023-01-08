@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -18,6 +18,23 @@ export class BoardsService {
   }
   // TEST 용
 
+  async getBoardById(id: number) {
+    const board = this.prisma.board.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!board) {
+      throw new NotFoundException(
+        '해당 id 를 가지는 게시물을 찾을 수 없습니다 X(',
+      );
+    }
+
+    return board;
+  }
+
+  // 아래 부분은 더 이상 사용하지 않음.
   // getAllBoard(): Board[] {
   //   return this.boards;
   // }

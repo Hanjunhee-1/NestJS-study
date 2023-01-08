@@ -16,7 +16,7 @@ DB 연동을 통해 DB 에 있는 데이터를 활용할 때는 자신이 사용
     ```
         // boards.service.ts
         async getBoardById(id: number) {
-            const board = this.prisma.board.findUnique({
+            const board = await this.prisma.board.findUnique({
                 where: {
                     id,
                 },

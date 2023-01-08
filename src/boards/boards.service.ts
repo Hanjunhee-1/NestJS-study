@@ -47,14 +47,13 @@ export class BoardsService {
     });
     return board;
 
-    // 이런 방식도 있는데 return 값이 원하는대로(API 문서대로) 나오지 않을 듯...
+    // 추가 - 이런 방식도 있는데 return 값이 원하는대로(API 문서대로) 나오지 않을 듯...
     // const board: Prisma.BoardUncheckedCreateInput = {
     //   title,
     //   description,
     // };
 
     // // await this.prisma.board.create({ data: board });
-    // console.log(board);
     // return board;
   }
 

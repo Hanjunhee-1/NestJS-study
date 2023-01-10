@@ -11,6 +11,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id              Int         @id @default(autoincrement())
+  name            String      @db.VarChar(255)
+  password        String      @db.VarChar(255)
+}
+
 model Board {
   id              Int         @id @default(autoincrement())
   title           String      @db.VarChar(255)

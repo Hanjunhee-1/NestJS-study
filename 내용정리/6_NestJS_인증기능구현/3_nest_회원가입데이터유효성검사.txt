@@ -1,0 +1,26 @@
+이번에는 유효성 검사를 해볼 것이다.
+
+기존에 있던 CreateUserDto 를 아래와 같이 수정했다.
+```
+    // create-user.dto.ts
+    export class CreateUserDto {
+        @IsNotEmpty()
+        @IsString()
+        @MinLength(4)
+        @MaxLength(20)
+        name: string;
+
+        @IsNotEmpty()
+        @IsString()
+        @MinLength(4)
+        @MaxLength(20)
+        @Matches(/^[a-zA-Z0-9]*$/, {
+            message: 'password must be in English and number',
+        })
+        password: string;
+    }
+```
+모두 class-validator 이다. @Matches() 는 안에 Regular expression 과 에러 메시지를 받는다.
+
+※  해당 dto 를 사용하는 곳에서 @UsePipe(ValidationPipe) 를 해주어야 하지만 저번에 이미
+    Global-level 에서 하는 것으로 변경했기 때문에 안써도 된다.

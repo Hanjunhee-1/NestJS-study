@@ -1,0 +1,79 @@
+이번에는 회원가입 기능을 구현해볼 것이다.
+
+※  우선 의존성 주입이 필요한 것(service, prisma) 들은 해줘야 한다.
+
+
+일단 회원가입 기능에 필요한 dto 를 구현했다.
+```
+    // create-user.dto.ts
+    import { IsNotEmpty } from 'class-validator';
+
+    export class CreateUserDto {
+        @IsNotEmpty()
+        name: string;
+
+        @IsNotEmpty()
+        password: string;
+    }
+```
+
+그리고 아래와 같이 service 와 controller 의 내용을 작성했다.
+```
+    // auth.service.ts
+    import { Injectable } from '@nestjs/common';
+    import { PrismaService } from 'src/prisma/prisma.service';
+    import { CreateUserDto } from './dtos/create-user.dto';
+
+    @Injectable()
+    export class AuthService {
+        constructor(private readonly prisma: PrismaService) {}
+
+        async createUser(createUserDto: CreateUserDto) {
+            const { name, password } = createUserDto;
+
+            const user = await this.prisma.user.create({
+                data: {
+                    name,
+                    password,
+                },
+            });
+
+            return user;
+        }
+    }
+```
+```
+    // auth.controller.ts
+    import { Body, Controller, Post } from '@nestjs/common';
+    import { AuthService } from './auth.service';
+    import { CreateUserDto } from './dtos/create-user.dto';
+
+    @Controller('auth')
+    export class AuthController {
+        constructor(private readonly authService: AuthService) {}
+
+        @Post('/signUp')
+        async createUser(@Body() createUserDto: CreateUserDto) {
+            const user = await this.authService.createUser(createUserDto);
+            return user;
+        }
+    }
+```
+
+
+★  어...? 이게 왜 안되지???
+    해당 모듈의 imports 부분에 PrismaModule 을 넣어줘야 한다는 것을 잊지 말자...
+    ```
+        // auth.module.ts
+        import { Module } from '@nestjs/common';
+        import { PrismaModule } from 'src/prisma/prisma.module';
+        import { AuthController } from './auth.controller';
+        import { AuthService } from './auth.service';
+
+        @Module({
+            imports: [PrismaModule],
+            controllers: [AuthController],
+            providers: [AuthService],
+        })
+        export class AuthModule {}
+    ```

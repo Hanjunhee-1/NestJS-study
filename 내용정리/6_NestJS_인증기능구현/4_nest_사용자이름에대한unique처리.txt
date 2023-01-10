@@ -1,0 +1,57 @@
+지금 회원가입 뿐만 아니라 User 테이블의 문제가 있다.
+동일한 이름으로 회원가입을 해도 DB 에 그대로 입력된다는 것이다.
+
+
+해결 방법은 2가지가 있다.
+    (1) 회원가입을 하려고 할 때 해당 이름을 가지는 user 를 찾아서 존재한다면 예외처리 해주고
+        존재하지 않는다면 회원가입 시켜준다.
+        --> 약간 비효율적인 방법이다.
+
+    (2) User 테이블의 name 컬럼을 unique 로 바꿔주고 회원가입 시 unique 를 지키지 않아 생긴 에러에 대한
+        예외처리를 해준다.
+        --> (1) 보다 효율적이다.
+
+
+우선 schema.prisma 의 User model 을 수정해준다.
+```
+    // schema.prisma
+    model User {
+        id              Int         @id @default(autoincrement())
+        name            String      @db.VarChar(255)  @unique
+        password        String      @db.VarChar(255)
+    }
+```
+@unique 를 추가해주었다. 이제 해당 컬럼의 값은 새로운 row 가 생성되었을 때
+중복되는 값을 가질 수 없다. 만약 중복되는 값을 넣으려고 한다면 에러가 난다.
+
+
+service 도 수정해준다.
+```
+    // auth.service.ts
+    async createUser(createUserDto: CreateUserDto) {
+        const { name, password } = createUserDto;
+
+        try {
+        const user = await this.prisma.user.create({
+            data: {
+                name,
+                password,
+            },
+        });
+
+        return user;
+        } catch (error) {
+            if (error.meta.target === 'User_name_key') {
+                throw new ConflictException('해당 name 은 사용할 수 없습니다.');
+            } else {
+                throw new InternalServerErrorException();
+            }
+        }
+    }
+```
+발생한 에러를 볼 수 있도록 try-catch 문을 사용했다.
+이미 존재하는 name 값으로 회원가입하려 했을 때 발생한 error 를 보니 
+에러 발생코드, 메타데이터 등 여러가지가 있었는데 그 중에서도 메타데이터의 target 을 통해서
+예외처리를 진행할 수 있도록 했다. target 의 값이 'User_name_key' 였는데 
+'User 모델의 name 이라는 값이 이미 존재하는 값이다' 라는 뜻인 것 같다.
+그래서 해당 부분에 대한 예외처리를 해주었고 그것이 아니라면 server 에러로 표시하도록 했다.

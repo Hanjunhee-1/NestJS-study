@@ -1,0 +1,59 @@
+비밀번호는 암호화해서 DB 에 저장해야 한다.
+
+그래서 암호화를 위한 bcryptjs 라는 패키지를 설치해주었다.
+```
+    npm install bcryptjs
+```
+
+만약 A 라는 유저의 비밀번호 1234 라면 
+이를 암호화를 통해 DB 에 저장할 것이다.
+
+하지만 B 라는 유저의 비밀번호도 1234 라면...?
+
+A 유저의 비밀번호인 1234 가 암호환 된 값이 AsdfasdfasDKDMVKckdmks 라면
+B 유저의 비밀번호도 AsdfasdfasDKDMVKckdmks 로 암호화 될 것이다.
+
+이때 bcryptjs 패키지의 salt 라는 것을 사용할 것이다.
+
+salt 는 랜덤으로 생성되는 고유의 문자열이라고 생각하면 된다.
+
+salt_1234 가 암호화 되어
+똑같은 비밀번호를 가지더라도 암호화 된 값은 다르게 될 것이다.
+
+그러면 암호화된 값을 통해 DB 에서 오직 해당 유저의 계정만 찾을 수 있다.
+
+----------------------------------------------------------------------
+
+위에서는 개념을 설명했고 이번에는 직접 적용해볼 것이다.
+
+아래와 같이 AuthService 를 수정해주었다.
+```
+    // auth.service.ts
+    import * as bcrypt from 'bcryptjs';
+    ...
+    async createUser(createUserDto: CreateUserDto) {
+        const { name, password } = createUserDto;
+
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        console.log({ name, password, hashedPassword });
+
+        try {
+            const user = await this.prisma.user.create({
+                data: {
+                    name,
+                    password: hashedPassword,
+                },
+            });
+
+            return user;
+        } catch (error) {
+            if (error.meta.target === 'User_name_key') {
+                throw new ConflictException('해당 name 은 사용할 수 없습니다.');
+            } else {
+                throw new InternalServerErrorException();
+            }
+        }
+    }
+```

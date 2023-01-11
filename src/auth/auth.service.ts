@@ -11,6 +11,24 @@ import * as bcrypt from 'bcryptjs';
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // bcrypt 복호화 예시
+  async logIn(name: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        name,
+      },
+    });
+
+    const isRight = await bcrypt.compare(password, user.password);
+
+    if (isRight) {
+      return user;
+    } else {
+      return '비밀번호가 잘못되었습니다.';
+    }
+  }
+  // bcrypt 복호화 예시
+
   async createUser(createUserDto: CreateUserDto) {
     const { name, password } = createUserDto;
 

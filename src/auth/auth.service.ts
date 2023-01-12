@@ -8,18 +8,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import * as bcrypt from 'bcryptjs';
 import { SignInDto } from './dtos/sign-in.dto';
+import { JwtService } from '@nestjs/jwt/dist';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async signUp(signUpDto: SignUpDto) {
     const { name, password } = signUpDto;
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    console.log({ name, password, hashedPassword });
 
     try {
       const user = await this.prisma.user.create({
@@ -49,7 +51,13 @@ export class AuthService {
     });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      return 'success';
+      const payload = {
+        id: user.id,
+        name: name,
+      };
+
+      const accessToken = await this.jwtService.sign(payload);
+      return { accessToken: accessToken };
     } else {
       throw new UnauthorizedException('failed');
     }

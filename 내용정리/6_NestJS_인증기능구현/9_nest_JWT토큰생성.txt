@@ -1,0 +1,131 @@
+★  어쩌면 나는 이것을 배우기 위해 NestJS 를 처음부터 다시 공부한 것일지도 모른다.
+★  참고 링크:
+    https://docs.nestjs.com/security/authentication#authentication
+
+JWT 에 대한 설명은 '8_nest_JWT에대해서' 에서 다루었다.
+
+
+우선, JWT 를 다루기 위해 필요한 패키지들을 설치해주었다.
+```
+    npm i @nestjs/jwt @nestjs/passport passport passport-jwt
+```
+
+
+그 다음 JWT 적용이 필요한 모듈에서 JWT 에 대한 설정을 해주었다.
+설정은 다음과 같다.
+```
+    // auth.module.ts
+    import { Module } from '@nestjs/common';
+    import { JwtModule } from '@nestjs/jwt';
+    import { PassportModule } from '@nestjs/passport';
+    import { PrismaModule } from 'src/prisma/prisma.module';
+    import { AuthController } from './auth.controller';
+    import { AuthService } from './auth.service';
+
+    @Module({
+        imports: [
+            PrismaModule,
+            PassportModule.register({ defaultStrategy: 'jwt' }),
+            JwtModule.register({
+                secret: process.env.SECRET_KEY,
+                signOptions: {
+                    expiresIn: 60 * 60,
+                },
+            }),
+        ],
+        controllers: [AuthController],
+        providers: [AuthService],
+    })
+    export class AuthModule {}
+```
+PassportModule 과 JwtModule 을 등록하여 사용해야 JWT 토큰을 사용할 수 있다. 
+Passport 가 무엇일까?
+--> nods.js 에서 가장 유명한 인증 라이브러리이다. 인증을 구현해야 할때 많이들 사용한다.
+아직은 굳이 자세하게 알아볼 필요까지는 없을 것 같다.
+
+PassportModule.register() 를 통해 어떤 종류의 인증을 사용할 것인지 정한다. --> 나는 'jwt' 를 선택했다.
+JwtModule.register() 를 통해 JWT 토큰의 설정을 해준다.
+secret 을 보면 process.env.SECRET_KEY 라고 되어있는데 이렇게 한 이유는 '8_nest_JWT에대해서' 에서도 설명한 적이 있듯이
+SECRET_KEY 가 노출되면 안전한 토큰 기반 인증이 아니기 때문에 따로 env 파일에 적어놓고 불러오는 방식으로 구현했다.
+
+★  env 파일 사용법을 알고 싶다면?
+    https://docs.nestjs.com/techniques/configuration#configuration
+    https://tre2man.tistory.com/269
+
+그리고 signOptions 에서 기간이나 발급자 등에 대한 것을 설정하면 되는데 유효시간만 설정해주면 충분하다.
+유효시간은 60초 * 60 으로 1시간 동안 유효하도록 설정했다. 즉, 1시간이 지나면 해당 토큰으로 인증을 받을 수 없다.
+
+
+설정은 끝났고 이제 제일 중요한 로직을 짜는 부분이다. 어려울 줄 알았는데 의외로 쉬워서 놀랐다...
+아래와 같이 로직을 구현했다.
+```
+    // auth.service.ts
+    constructor(
+        private readonly prisma: PrismaService,
+
+        // JWT 사용을 위한 의존성 주입 추가!
+        private readonly jwtService: JwtService,
+    ) {}
+    
+    ...
+
+    async signIn(signInDto: SignInDto) {
+        const { name, password } = signInDto;
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                name,
+            },
+        });
+
+        if (user && (await bcrypt.compare(password, user.password))) {
+            const payload = {
+                id: user.id,
+                name: name,
+            };
+
+            const accessToken = await this.jwtService.sign(payload);
+            return { accessToken: accessToken };
+        } else {
+            throw new UnauthorizedException('failed');
+        }
+    }
+```
+토큰을 사용하기 전에는 로그인 성공 시에 'success' 문구를 반환했는데 이제는 해당 유저에 대한 JWT 토큰을 발급해주면 된다.
+우선 JWT 의 구성요소인 payload 를 작성해준다. 
+
+Q.  Header 에 관한 설정은 안해줘도 되는걸까...?
+    그렇다. 왜냐하면 이미 모듈에 PassportModule 과 JwtModule 에 대한 설정을 해주었기 때문이다.
+
+payload 에는 원하는 값을 넣어주면 된다. 보통은 사용자가 굳이 또 자신의 정보(id, password) 를 보내주지 않아도 되게
+사용자 테이블에서 unique 한 값을 JWT 토큰 payload 부분에 넣어준다. 현재 나의 User 테이블의 경우 name 값만을 보내주면 된다.
+id 는 안보내줘도 되는데 그냥 해보고 싶어서...
+
+이렇게 payload 에 대한 정보를 입력했다면 이제는 해당 payload 로 토큰을 만들어야 한다.
+accessToken 이라는 변수명으로 만들어줬다. token 을 만들때는 jwtService 의 sign() 이라는 함수를 이용하는데
+해당 함수의 매개변수로 작성해두었던 payload 를 넘겨주면 JWT 토큰이 accessToken 에 저장된다. 
+
+return 문은 
+```
+    return accessToken;
+```
+이런 식으로 해도 되지만 구색을 갖추고 싶어서... JSON 형식으로 반환해주었다.
+
+
+★  테스트 방법!
+
+    JWT 토큰이 올바르게 생성되는지 확인해야 한다. 
+    
+    (1) 우선 로그인을 하여 JWT 토큰을 얻는다.
+    (2) 해당 JWT 토큰을 복사하여 갖고 있는다.
+    (3) https://jwt.io#debugger-io 로 이동한다.
+    (4) Decoded 의 VERIFY SIGNATURE 부분에서 자신이 설정한 SECRET_KEY 를 입력한다.
+    (5) Encoded 부분을 싹 지워주고 자신이 갖고 있던 JWT 토큰을 복사하여 넣어본다.
+    (6) Encoded 부분 맨 아래에 'Invalid Signature' 가 아닌 'Signature Verified' 가 나오고 
+        Decoded 의 PAYLOAD 부분에 자신이 작성했었던 payload 의 내용대로 나왔다면 성공이다!
+
+        ※ 만약 해당 과정대로 했는데도 'Invalid Signature' 가 나왔다면 secret key 설정이 잘못된 것이니 확인해봐야 한다.
+
+
+드디어 JWT 를 조금이나마 이해하게 되었고
+이제 다루는 방법을 알게 되었다는 것이 기쁘다.

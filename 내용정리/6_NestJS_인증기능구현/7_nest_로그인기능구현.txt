@@ -1,0 +1,54 @@
+'6_nest_비밀번호복호화' 가 별로 안 중요하다고 했지만 실은 중요했다.
+그래서 저걸 다시 참고하면 좋을 것 같다.
+
+※  CreateUserDto 를 SignUpDto 라는 이름으로 바꿔주었다. (그냥 이름만 바꿨다.)
+
+우선 로그인에 사용할 dto 를 생성해주었다.
+```
+    // sign-in.dto.ts
+    import { IsNotEmpty } from 'class-validator';
+
+    export class SignInDto {
+        @IsNotEmpty()
+        name: string;
+
+        @IsNotEmpty()
+        password: string;
+    }
+```
+SignUpDto 와 굉장히 유사하지만 validator 가 많이 줄었는데 그 이유는 다음과 같다.
+
+    (1) 이미 계정을 갖고 있어서 로그인하려는 유저라면 알아서 잘 입력할 것이다.
+    (2) 혹시나 빈 칸으로 제출하는 경우만 막기 위해 @IsNotEmpty() 를 추가해주었다.
+
+원래 이런 식으로 하면 안될 것 같은데 지금은 공부하는 단계니까 넘어간다!
+
+
+그리고 다음과 같이 로그인 기능을 구현해주었다.
+```
+    // auth.service.ts
+    async signIn(signInDto: SignInDto) {
+        const { name, password } = signInDto;
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                name,
+            },
+        });
+
+        if (user && (await bcrypt.compare(password, user.password))) {
+            return 'success';
+        } else {
+            throw new UnauthorizedException('failed');
+        }
+    }
+```
+```
+    // auth.controller.ts
+    @Post('/signIn')
+    async signIn(@Body() signInDto: SignInDto) {
+        const result = await this.authService.signIn(signInDto);
+        return result;
+    }
+```
+간단하게 구현이 끝났다!

@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
@@ -18,6 +19,14 @@ export class AuthController {
     const result = await this.authService.signIn(signInDto);
     return result;
   }
+
+  // JWT 토큰으로 정보요청 테스트
+  @Post('/test')
+  @UseGuards(AuthGuard())
+  test(@Req() req) {
+    console.log(req.user);
+  }
+  // JWT 토큰으로 정보요청 테스트
 
   // bcrypt 복호화 예시
   // @Get('/logIn')

@@ -1,6 +1,8 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { GetUser } from './decorators/get-user.decorator';
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
 
@@ -23,8 +25,8 @@ export class AuthController {
   // JWT 토큰으로 정보요청 테스트
   @Post('/test')
   @UseGuards(AuthGuard())
-  test(@Req() req) {
-    console.log(req.user);
+  test(@GetUser() user: User) {
+    console.log(user);
   }
   // JWT 토큰으로 정보요청 테스트
 

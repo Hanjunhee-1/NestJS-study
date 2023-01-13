@@ -1,0 +1,41 @@
+이번에는 AuthModule 을 통해 JWT 토큰 인증을 받은 사용자만 게시물을 열람하고 작성하는 등의 작업을 
+허용하도록 해볼 것이다.
+
+※  일반적인 게시판 사이트를 생각해보면 열람하는 것까지는 로그인 기능이 없어도 되는데...
+    일단은 게시물에 대한 모든 작업에 대해 JWT 토큰 인증 즉, 로그인이 되어야지만 할 수 있도록 해볼 것이다.
+    나중에 이것은 수정해보기로 할 것이다.
+
+
+일단 BoardsModule 을 수정해주어야 한다.
+```
+    // boards.module.ts
+    import { Module } from '@nestjs/common';
+    import { AuthModule } from 'src/auth/auth.module';
+    import { PrismaModule } from 'src/prisma/prisma.module';
+    import { BoardsController } from './boards.controller';
+    import { BoardsService } from './boards.service';
+
+    @Module({
+        // Prisma 를 통한 CRUD 작업을 위해 꼭 필요함.
+        // JWT 토큰 기반 인증을 위해 AuthModule 추가
+        imports: [PrismaModule, AuthModule],
+        controllers: [BoardsController],
+        providers: [BoardsService],
+    })
+    export class BoardsModule {}
+```
+AuthModule 에서 JWT 토큰 인증에 필요한 JwtStrategy, PassportModule 을 export 해주고 있기 때문에
+BoardsModule 에서는 AuthModule 을 import 해주기만 하면 된다.
+
+
+그리고 BoardsController 를 수정해주었다.
+```
+    // boards.controller.ts
+    @Controller('boards')
+    @UseGuards(AuthGuard())
+    export class BoardsController {
+        ...
+    }    
+```
+Guard 를 Controller 레벨에 적용시켜주면 게시물 CRUD 작업에 대해 JWT 토큰 인증이 필요하게 된다.
+이제 사용자로 로그인해서 JWT 를 받고 해당 JWT 를 헤더에 Authorization 에 넣어주어야지만 게시물 CRUD 작업이 가능하다.

@@ -19,10 +19,12 @@
     import { createParamDecorator, ExecutionContext } from '@nestjs/common';
     import { User } from '@prisma/client';
 
-    export const GetUser = createParamDecorator((ctx: ExecutionContext): User => {
-        const req = ctx.switchToHttp().getRequest();
-        return req.user;
-    });
+    export const GetUser = createParamDecorator(
+        (data, ctx: ExecutionContext): User => {
+            const req = ctx.switchToHttp().getRequest();
+            return req.user;
+        },
+    );
 ```
 데코레이터 이름은 GetUser 로 나중에 controller 에서 @GetUser() 이런 식으로 사용할 것이다.
 커스텀 데코레이터를 생성하기 위해 createParamDecorator() 라는 함수를 사용한다.
@@ -31,6 +33,13 @@ ExecutionContext 이다. 간단히 말하자면 현재 실행되는 프로세스
 request 뿐만 아니라 response 에 대한 정보도 얻을 수 있다.
 ※  https://velog.io/@hahaha/NestJS-Execution-context
     자세한 것은 위의 링크를 참고하자.
+
+그리고 data 라는 것도 있는데 @Param('id') id: string 이런식으로 사용하면 사용자가 요청한 것중에서
+Path Parameter 에서 id 라는 이름을 찾아 그 값을 활용했던 것처럼 @GetUser() 에서도 매개변수 값을 넘겨주면
+저런 식으로 활용할 수가 있다! 일단 내가 작성한 커스텀 데코레이터에서는 사용하지 않지만 없으면 TypeError 가 발생하니
+꼭 추가해주자! 
+※  https://velog.io/@mskwon/NestJS-Overview-Custom-Decorators
+    자세한 내용은 위의 링크를 참고하자.
 
 arrow 함수의 반환 타입은 작성했던 model 중에 User 이다. 안에 내용은 크게 어려운 것이 없다.
 req 라는 변수에 사용자의 요청 정보를 담고 해당 요청 정보 중에서 user 에 접근하여 req.user 를 반환해준다.

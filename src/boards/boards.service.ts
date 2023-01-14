@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BoardStatus } from '@prisma/client';
-// import { Prisma } from '@prisma/client';
+import { Board, BoardStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
 
@@ -22,14 +21,21 @@ export class BoardsService {
   // TEST 용
 
   async getBoards() {
-    const boards = await this.prisma.board.findMany();
+    const boards: Board[] = await this.prisma.board.findMany({
+      include: {
+        user: true,
+      },
+    });
     return boards;
   }
 
   async getBoardById(id: number) {
-    const board = await this.prisma.board.findUnique({
+    const board: Board = await this.prisma.board.findUnique({
       where: {
         id,
+      },
+      include: {
+        user: true,
       },
     });
 
@@ -42,13 +48,21 @@ export class BoardsService {
     return board;
   }
 
-  async createBoard(createBoardDto: CreateBoardDto) {
+  async createBoard(createBoardDto: CreateBoardDto, user: User) {
     const { title, description } = createBoardDto;
 
-    const board = await this.prisma.board.create({
+    const board: Board = await this.prisma.board.create({
       data: {
         title,
         description,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+      include: {
+        user: true,
       },
     });
     return board;
@@ -64,7 +78,7 @@ export class BoardsService {
   }
 
   async deleteBoard(id: number) {
-    const board = await this.getBoardById(id);
+    const board: Board = await this.getBoardById(id);
 
     await this.prisma.board.delete({
       where: {
@@ -76,7 +90,7 @@ export class BoardsService {
   }
 
   async updateBoardStatus(id: number, status: BoardStatus) {
-    const board = await this.getBoardById(id);
+    const board: Board = await this.getBoardById(id);
 
     await this.prisma.board.update({
       where: {

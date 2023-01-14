@@ -10,7 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { BoardStatus } from '@prisma/client';
+import { BoardStatus, User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
@@ -40,8 +41,11 @@ export class BoardsController {
   }
 
   @Post()
-  async createBoard(@Body() createBoardDto: CreateBoardDto) {
-    const board = await this.boardsService.createBoard(createBoardDto);
+  async createBoard(
+    @Body() createBoardDto: CreateBoardDto,
+    @GetUser() user: User,
+  ) {
+    const board = await this.boardsService.createBoard(createBoardDto, user);
     return board;
   }
 

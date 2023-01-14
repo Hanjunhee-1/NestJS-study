@@ -25,7 +25,8 @@ export class AuthController {
   // JWT 토큰으로 정보요청 테스트
   @Post('/test')
   @UseGuards(AuthGuard())
-  test(@GetUser() user: User) {
+  // @GetUser() 에 'name' 을 넘겨준 것을 어떻게 활용하는지는 get-user.decorator.ts 에서 확인 가능
+  test(@GetUser('name') user: User) {
     console.log(user);
   }
   // JWT 토큰으로 정보요청 테스트

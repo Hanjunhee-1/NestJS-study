@@ -1,0 +1,17 @@
+PrismaModule 을 사용하지 않는 곳은 없음...
+
+때문에 해당 모듈을 사용하는 서비스에서는 
+서비스가 속해있는 모듈의 imports 부분에 PrismaModule 을 추가해주어야 하는데...
+굳이 그럴 필요 없이 PrismaModule 자체를 전역레벨로 설정하면 된다!
+
+설정방법은 다음과 같다
+```
+    // prisma.module.ts
+    @Global()
+    @Module({
+        providers: [PrismaService],
+        exports: [PrismaService],
+    })
+    export class PrismaModule {}
+```
+@Global() 데코레이터만 추가해주면 된다.

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common/exceptions';
 import { Board, BoardStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
@@ -87,14 +88,23 @@ export class BoardsService {
     // return board;
   }
 
-  async deleteBoard(id: number) {
+  async deleteBoard(id: number, user: User) {
     const board: Board = await this.getBoardById(id);
 
-    await this.prisma.board.delete({
-      where: {
-        id: board.id,
-      },
-    });
+    if (board.userId === user.id) {
+      await this.prisma.board.delete({
+        where: {
+          id: board.id,
+        },
+      });
+    } else {
+      throw new UnauthorizedException('게시물을 삭제할 권한이 없습니다.');
+    }
+    // await this.prisma.board.delete({
+    //   where: {
+    //     id: board.id,
+    //   },
+    // });
 
     return 'success';
   }

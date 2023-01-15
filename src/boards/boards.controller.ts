@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -29,8 +30,8 @@ export class BoardsController {
   // TEST 용
 
   @Get()
-  async getBoards() {
-    const boards = await this.boardsService.getBoards();
+  async getBoards(@Query('userId') userId: number) {
+    const boards = await this.boardsService.getBoards(+userId);
     return boards;
   }
 

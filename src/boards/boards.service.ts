@@ -20,12 +20,22 @@ export class BoardsService {
   }
   // TEST 용
 
-  async getBoards() {
-    const boards: Board[] = await this.prisma.board.findMany({
-      include: {
-        user: true,
-      },
-    });
+  async getBoards(userId: number) {
+    let boards: Board[];
+
+    if (userId) {
+      boards = await this.prisma.board.findMany({
+        where: {
+          userId,
+        },
+      });
+    } else {
+      boards = await this.prisma.board.findMany({
+        include: {
+          user: true,
+        },
+      });
+    }
     return boards;
   }
 

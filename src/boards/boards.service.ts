@@ -100,11 +100,6 @@ export class BoardsService {
     } else {
       throw new UnauthorizedException('게시물을 삭제할 권한이 없습니다.');
     }
-    // await this.prisma.board.delete({
-    //   where: {
-    //     id: board.id,
-    //   },
-    // });
 
     return 'success';
   }

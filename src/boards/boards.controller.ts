@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -20,6 +21,7 @@ import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe'
 @Controller('boards')
 @UseGuards(AuthGuard())
 export class BoardsController {
+  private readonly logger = new Logger('BoardsController');
   constructor(private readonly boardsService: BoardsService) {}
 
   // TEST 용
@@ -46,6 +48,8 @@ export class BoardsController {
     @Body() createBoardDto: CreateBoardDto,
     @GetUser() user: User,
   ) {
+    this.logger.verbose(`${user.name} trying to create new board
+    Payload: ${JSON.stringify(createBoardDto)}`);
     const board = await this.boardsService.createBoard(createBoardDto, user);
     return board;
   }
@@ -55,6 +59,7 @@ export class BoardsController {
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
   ) {
+    this.logger.verbose(`${user.name} trying to delete board has id: ${id}`);
     const result = await this.boardsService.deleteBoard(id, user);
     return result;
   }

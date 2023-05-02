@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `testCount` INTEGER NOT NULL DEFAULT 0;

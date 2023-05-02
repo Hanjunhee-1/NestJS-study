@@ -15,6 +15,7 @@ model User {
   id              Int         @id @default(autoincrement())
   name            String      @db.VarChar(255)  @unique
   password        String      @db.VarChar(255)
+  testCount       Int         @default(0)
 
   phase Phase? @relation(fields: [phaseId], references: [id])
   phaseId Int?

@@ -16,6 +16,9 @@ model User {
   name            String      @db.VarChar(255)  @unique
   password        String      @db.VarChar(255)
 
+  phase Phase? @relation(fields: [phaseId], references: [id])
+  phaseId Int?
+
   boards          Board[]
 }
 
@@ -31,4 +34,13 @@ model Board {
 enum BoardStatus {
   PUBLIC
   PRIVATE
+}
+
+model Phase {
+  id  Int @id @default(autoincrement())
+  title String @db.VarChar(255)
+  start DateTime
+  end DateTime
+
+  user  User[]
 }

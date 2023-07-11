@@ -1,8 +1,0 @@
-nest-cli.json 파일은 nest 프로젝트 실행을 위한 설정 값들이 있다.
-
-.eslintrc.js, .prettierrc 파일들은 코드를 통일성 있게 맞춰주기 위한 파일이라고 생각하면 된다.
-
-package.json, package-lock.json 파일은 dependency 에 대한 내용이 있고
-특히 package.json 에는 실행 명령어(scripts) 등에 대한 내용들이 있다.
-
-src 에는 실제 nest 프로젝트 동작을 위한 소스 코드들이 담겨져 있는 곳이다.
